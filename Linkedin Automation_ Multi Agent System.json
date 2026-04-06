@@ -1,0 +1,297 @@
+{
+  "name": "Linkedin Automation: Multi Agent System",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Linkedin Automation",
+        "formDescription": "Linkedin Automation system",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Post Topic",
+              "placeholder": "Post Topic",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Type Of Audience",
+              "placeholder": "business, fun, etc",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -1152,
+        -96
+      ],
+      "id": "c8f93608-c6d2-4959-b1ca-fc27cc45d152",
+      "name": "On form submission",
+      "webhookId": "dd5fac67-0e94-4178-9955-8ad7e0b55661"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -992,
+        112
+      ],
+      "id": "c38b02b7-1fa1-46dc-9667-f95f84dab70d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "dvyKEKLuO8j7ID8d",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Post Topic: {{ $json['Post Topic'] }}\nPost catagory: {{ $json['Type Of Audience'] }}\n",
+        "options": {
+          "systemMessage": "=#role\nGenerate LinkedIn posts that are professional, insightful, and highly engaging — crafted to fit any topic, industry, or audience.\n\n\n⚙️ Workflow\nWhenever a topic is provided, follow this end-to-end process:\n\n1. Research with Tavily\n\nUse the Tavily search tool for real-time, reliable data.\n\nCollect the newest and most credible insights.\n\nPrioritize facts, statistics, trends, expert opinions, and case studies that meaningfully elevate the post.\n\n\n\n2. Craft the LinkedIn Post\n\nBegin with a powerful hook to capture attention instantly.\n\nMaintain a professional, confident, and value-driven tone.\n\nKeep it clean and easy to read — short paragraphs, logical structure, smooth flow.\n\nFocus on educational, practical, and actionable insights.\n\nUse emojis sparingly and only when they add clarity or emphasis.\n\nAttribute information properly (e.g., “according to [source]”).\n\nEnd with a clear call to action encouraging comments, opinions, or shares.\n\nAdd relevant, topic-specific hashtags to maximize reach.\n\n\n📝 Output Rules\n\nOutput only the final LinkedIn post.\n\nDo not describe your process or mention the steps used.\n\nAvoid quotation marks or unnecessary formatting — write naturally as a LinkedIn post.\n\n📌 Example Scenario\nTopic: The ROI of warehouse automation\n→ You research up-to-date data, trends, and real success stories.\n→ Then craft a polished LinkedIn post with a sharp hook, strong insights, and a compelling CTA."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -928,
+        -96
+      ],
+      "id": "9043e502-df9f-4373-8bbd-56d39a8627f0",
+      "name": "Description Generator Agent"
+    },
+    {
+      "parameters": {
+        "query": "={{ $json['Post Topic'] }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        -792,
+        128
+      ],
+      "id": "4bb6052d-95b5-416e-823e-e94885e85dc4",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "Idit7Qv8gNZhJYqY",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=linkedin post details:  {{ $json.output }}",
+        "options": {
+          "systemMessage": "=Purpose\nYou are an AI agent that converts LinkedIn posts into high-quality visual prompt descriptions. These descriptions will be used by a text-to-image engine to generate professional marketing graphics that visually strengthen the original LinkedIn content. also remove pollination.ai watermark or logo when generate any images\n\nCore Objectives\n\nAnalyze the LinkedIn post and extract its central message or insight.\n\nTranslate that message into a clear, compelling visual concept.\n\nProduce a prompt suitable for creating polished, brand-consistent marketing graphics.\n\nAvoid literal or hyperrealistic imagery; focus on modern professional design. \n\nVisual Standards\n\n\nThe generated visual prompt must:\n\nReinforce the key idea of the post\n\nFit LinkedIn’s modern aesthetic: clean, minimalist, professional\n\nUse current design trends and polished composition\n\nFeel intentional, branded, and marketing-oriented\n\nOutput Rules\n\nOutput only the final visual prompt — no explanations or extra text\n\nNo placeholders (e.g., “header goes here”)\n\nInclude numerical stats that appear in the post\n\nDo not use quotation marks around the prompt\n\nThe result must be directly usable in a text-to-image generator\n\n\n\nDesign Language & Allowed Elements\nThink like a senior brand designer. Your prompts may include:\n\nFlat or minimalist illustrations\n\nAbstract shapes, gradients, or modern geometric elements\n\nInfographic-style visuals (charts, percentages, metrics)\n\nConceptual metaphors (e.g., mountain = growth, bridge = opportunity)\n\nLight typography references (e.g., “space for headline text”)\n\nLayout hints (e.g., “split-screen composition,” “center-focused design”)\n\nOptional enhancements: soft shadows, motion lines, UI-style panels\n\nPrompt Style Example\nModern flat-design illustration of a glowing lightbulb emerging from a maze, symbolizing innovation through complexity. Clean gradient background with empty top-right space for headline text and subtle data visual elements on the left."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        -96
+      ],
+      "id": "0b21e1c5-3445-4436-83e4-1bc50cdde955",
+      "name": "Image prompt Generator Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=linkedin post desciption: {{ $('Description Generator Agent').item.json.output }}",
+        "options": {
+          "systemMessage": "=Your task is to create high-impact LinkedIn post titles. Each title must follow these rules:\n\nMaximum length: 20–30 words\n\nMust be hooky, engaging, and attention-grabbing\n\nUse strong verbs, curiosity gaps, and clear value\n\nAvoid clickbait or exaggeration\n\nMatch the tone of professional LinkedIn content\n\nReflect the core idea or insight of the provided post\n\nAlways return only 1 unique title."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -224,
+        -96
+      ],
+      "id": "ae8af856-470b-44e5-919a-5611c0eb787d",
+      "name": "Generate Title"
+    },
+    {
+      "parameters": {
+        "url": "=https://image.pollinations.ai/prompt/ {{ $('Image prompt Generator Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        128,
+        -96
+      ],
+      "id": "cc083faa-907c-4b87-8b8e-2cad461609e1",
+      "name": "Image"
+    },
+    {
+      "parameters": {
+        "person": "53xu2WOIh6",
+        "text": "={{ $('Description Generator Agent').item.json.output }}",
+        "shareMediaCategory": "IMAGE",
+        "additionalFields": {
+          "title": "={{ $('Generate Title').item.json.output }}"
+        }
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -96
+      ],
+      "id": "3112402b-9ca7-4a0b-b8be-411bec39d4da",
+      "name": "Create a post"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09AM8Z5N4V",
+          "mode": "list",
+          "cachedResultName": "all-hablu-programmer"
+        },
+        "text": "=you have published new post on linkedin:  {{ $('Generate Title').item.json.output }}\n\n",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        576,
+        -96
+      ],
+      "id": "710ac729-a985-4eca-b3f9-db837fbb23eb",
+      "name": "Send a message",
+      "webhookId": "a584fa82-315b-477b-91a4-f8159ac8c02e"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Description Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Description Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Image prompt Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate Title",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Description Generator Agent": {
+      "main": [
+        [
+          {
+            "node": "Image prompt Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Description Generator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image prompt Generator Agent": {
+      "main": [
+        [
+          {
+            "node": "Generate Title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Title": {
+      "main": [
+        [
+          {
+            "node": "Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a post": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d03d8850-0860-49cb-8c3a-8602868d3af0",
+  "meta": {
+    "instanceId": "ff0006fc908e706f73518b4e3db17d97601bf31f154a300d9a76d84e35a24bac"
+  },
+  "id": "GUt7Uu9cYAx2wQux",
+  "tags": []
+}
